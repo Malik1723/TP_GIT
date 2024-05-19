@@ -1,0 +1,35 @@
+<RCC>
+  <qresource prefix="rsr">
+    <file>image.png</file>
+    <file>IMG-20240519-WA0000 (1).jpg</file>
+    <file>download (1).jpg</file>
+    <file>IMG-20240519-WA0000.jpg</file>
+    <file>OIP.jpg</file>
+    <file>th (5).jpg</file>
+    <file>logo.PNG</file>
+    <file>th (4).jpg</file>
+    <file>Logo-menu-actia (1).png</file>
+    <file>th (3).jpg</file>
+    <file>th (2).jpg</file>
+    <file>th.jpg</file>
+    <file>th (1).jpg</file>
+    <file>dashboard.png</file>
+    <file>dashboard_white.png</file>
+    <file>log_out.png</file>
+    <file>log_out_white.png</file>
+    <file>menu.png</file>
+    <file>notifications.png</file>
+    <file>notifications_white (1).png</file>
+    <file>notifications_white.png</file>
+    <file>profile_pic.png</file>
+    <file>ressource.qrc</file>
+    <file>settings.png</file>
+    <file>settings_white.png</file>
+    <file>profile_pic.png</file>
+    <file>dashboard.png</file>
+    <file>dashboard_white.png</file>
+    <file>log_out.png</file>
+    <file>log_out_white.png</file>
+    <file>menu.png</file>
+  </qresource>
+</RCC>
