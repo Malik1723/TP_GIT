@@ -8,14 +8,14 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+from PyQt5.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout,
+from PyQt5.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout,
     QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QSizePolicy, QSpacerItem, QStackedWidget, QTextEdit,
     QVBoxLayout, QWidget)
@@ -35,7 +35,7 @@ class Ui_MainWindow(object):
         self.Icon_only.setObjectName(u"Icon_only")
         self.Icon_only.setStyleSheet(u"QWidget {\n"
 "	\n"
-"	background-color: rgb(0, 255, 127);\n"
+"	background-color:  rgb(0, 156, 75);\n"
 "}\n"
 "QPushButton {\n"
 " color : white;\n"
@@ -148,7 +148,7 @@ class Ui_MainWindow(object):
 "\n"
 "	\n"
 "	color : white;\n"
-"	background-color: rgb(0, 255, 127);\n"
+"	background-color:  rgb(0, 156, 75);\n"
 "}\n"
 "\n"
 "QPushButton {\n"
@@ -421,8 +421,8 @@ class Ui_MainWindow(object):
         self.Clear8project_Button.setObjectName(u"Clear8project_Button")
         sizePolicy1.setHeightForWidth(self.Clear8project_Button.sizePolicy().hasHeightForWidth())
         self.Clear8project_Button.setSizePolicy(sizePolicy1)
-        self.Clear8project_Button.setMinimumSize(QSize(40, 40))
-        self.Clear8project_Button.setMaximumSize(QSize(60, 40))
+        self.Clear8project_Button.setMinimumSize(QSize(70, 40))
+        self.Clear8project_Button.setMaximumSize(QSize(70, 40))
         self.Clear8project_Button.setStyleSheet(u"background-color: rgb(255, 0, 0);\n"
 "color: rgb(255, 255, 255);")
         self.Clear8project_Button.setCheckable(False)
@@ -561,7 +561,7 @@ class Ui_MainWindow(object):
         self.Generate_Btn = QPushButton(self.BT8Geneartion_Window)
         self.Generate_Btn.setObjectName(u"Generate_Btn")
         self.Generate_Btn.setMinimumSize(QSize(40, 30))
-        self.Generate_Btn.setStyleSheet(u"background-color: rgb(39, 255, 15);\n"
+        self.Generate_Btn.setStyleSheet(u"background-color:  rgb(0, 156, 75);\n"
 "color: rgb(255, 255, 255);")
 
         self.horizontalLayout_5.addWidget(self.Generate_Btn)

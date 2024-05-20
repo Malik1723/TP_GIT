@@ -4,9 +4,9 @@ from Menu import Ui_MainWindow
 
 from Xscade_Parser import *
 from Backtracing_Generator import *
-from PySide6.QtWidgets import QFileDialog, QMessageBox,QSpacerItem,QTextEdit , QGridLayout,QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget,QHBoxLayout ,QFormLayout ,QPushButton ,QComboBox , QFileDialog
-from PySide6.QtGui import QPixmap ,QFont ,QIcon
-from PySide6.QtCore import Qt
+from PyQt5.QtWidgets import QFileDialog, QMessageBox,QSpacerItem,QTextEdit , QGridLayout,QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget,QHBoxLayout ,QFormLayout ,QPushButton ,QComboBox , QFileDialog
+from PyQt5.QtGui import QPixmap ,QFont ,QIcon
+from PyQt5.QtCore import Qt
 
 class My_Window(QMainWindow,Ui_MainWindow):
     def __init__(self):
@@ -20,7 +20,7 @@ class My_Window(QMainWindow,Ui_MainWindow):
         self.setWindowIcon(icon)
 
 
-
+        self.Clear_Btn.clicked.connect(self.clear_report_file)
 
         self.Icon_Name.setHidden(True)
         self.Menu_Icon.clicked.connect(self.view_menu)
@@ -82,6 +82,20 @@ class My_Window(QMainWindow,Ui_MainWindow):
         self.Choose_Report_Folder_Btn.setStyleSheet("background-color:#f0f0f0;;")
 
 
+
+
+
+
+
+
+    def clear_report_file(self):
+        try:
+            with open(self.report_file, "w") as file:
+                    file.write("")  # Efface le contenu du fichier en le remplaçant par une chaîne vide
+            QMessageBox.information(self, "Report File Cleared", "The report file has been cleared.")
+            self.Choose_Report_Folder_Btn.setStyleSheet("background-color: #f0f0f0;")
+        except Exception as e:
+                QMessageBox.critical(self, "Error", f"An error occurred while clearing the report file: {str(e)}")
 
 
 

@@ -50,7 +50,7 @@ def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal
 
             Ds_Name = Signal_Depndecies[Desired_Signal][0][1]#Here when i will increment the system it should be changed
             #print(Ds_Name)   #print(f"{Ds_Name} i moved until the signal " )
-            BackTracing_Data+=f"\t\t\t\tThe - {Desired_Signal}-  is directly_connected to : \n \t\t\t\t\t ==>The Direct_Settable signal_Named : {Ds_Name}\n"
+            BackTracing_Data+=f"\t\t\t\t\t;#Set: {Desired_Signal}:\n \t\t\t\t\t\t;#SetInput: {Ds_Name}\n"
             #print(f"\t\t\t\tThe '{Desired_Signal}' is directly_connected to : \n \t\t\t\t\t ==>The Direct_Settable signal_Named : {Ds_Name}\n")
             #file.write(f"The - {Desired_Signal}-  is directly_connected to : \n \t\t ==>The Direct_Settable signal_Named : {Ds_Name}")
             # add it to the rapport
@@ -65,7 +65,7 @@ def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal
                 Lcl_variable_associated_to_the_out_signal, Local_Equation_for_the_current_operator,
                 Input_Equation_for_the_current_operator)
             #print(Equation_substututed)
-            BackTracing_Data+=f"The signal {Desired_Signal}  u want to set it is  Localised in the Operator {Operator_Name_Selected} and to track it : \n \t -U should to move until the operator {Previous_Operator} and  Set : \n \t\t -Firstly the output : {Out_Signal_For_Previous_Operator} \n \t\t -The equation of this output is : {Equation_substututed} \n \t\t -In The same Operator , the inputs u should to track also are : {Input_List_Tracked}\n"
+            BackTracing_Data+=f"The Signal : '{Desired_Signal}'  in '{Operator_Name_Selected}' :\n \t -Move to'{Previous_Operator}'\n \t\t ;#Set :{Out_Signal_For_Previous_Operator} \n \t\t\t -Equation:{Equation_substututed} \n \t\t\t\t  - ;#Set:{Input_List_Tracked}\n"
             #print(f"The signal {Desired_Signal}  u want to set it is  Localised in the Operator {Operator_Name_Selected} and to track it : \n \t -U should to move until the operator {Previous_Operator} and  Set : \n \t\t -Firstly the output : {Out_Signal_For_Previous_Operator} \n \t\t -The equation of this output is : {Equation_substututed} \n \t\t -In The same Operator , the inputs u should to track also are : {Input_List_Tracked}")
             if Input_List_Tracked:
                 for inputa in Input_List_Tracked:
@@ -75,12 +75,15 @@ def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal
             Output_Implementation[Operator_Name_Selected][Desired_Signal][0]
             print(Lcl_variable_associated_to_the_desired_signal)
             lcl_Implemntation_for_this_op = locale_Implementation[Operator_Name_Selected]
-            Inp_Implemntation_for_this_op = Inputs_Implemntation[Operator_Name_Selected]
 
+            print(lcl_Implemntation_for_this_op)
+            Inp_Implemntation_for_this_op = Inputs_Implemntation[Operator_Name_Selected]
+            print(Inp_Implemntation_for_this_op)
             Equ_Impl, Input_List_Tracked = Turn_substuated_equation(Lcl_variable_associated_to_the_desired_signal,
                                                                     lcl_Implemntation_for_this_op,
                                                                     Inp_Implemntation_for_this_op)
-            BackTracing_Data += f"Here i add the equation issue from the operator "
+            BackTracing_Data += f"Signal : {Desired_Signal}  in '{Operator_Name_Selected}' :\n \t - Equation : {Equ_Impl}\n \t\t ;#Set :{Input_List_Tracked} \t\t\t \n"
+            print(BackTracing_Data)
             if Input_List_Tracked:
                 for inp in Input_List_Tracked:
                     BackTracing_Data += Backtracing_Generation(All_operators, Operator_Name_Selected, inp, path_ds)
