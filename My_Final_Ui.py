@@ -5,7 +5,7 @@ from Menu import Ui_MainWindow
 from Xscade_Parser import *
 from Backtracing_Generator import *
 from PySide6.QtWidgets import QFileDialog, QMessageBox,QSpacerItem,QTextEdit , QGridLayout,QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget,QHBoxLayout ,QFormLayout ,QPushButton ,QComboBox , QFileDialog
-from PySide6.QtGui import QPixmap ,QFont
+from PySide6.QtGui import QPixmap ,QFont ,QIcon
 from PySide6.QtCore import Qt
 
 class My_Window(QMainWindow,Ui_MainWindow):
@@ -13,6 +13,15 @@ class My_Window(QMainWindow,Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle("Backtracing_Generator")
+
+        pixmap = QPixmap(r"Logo-menu-actia (1).png")
+        pixmap = pixmap.scaled(600, 600)  # Ajuster la taille à 30x30 pixels
+        icon = QIcon(pixmap)
+        self.setWindowIcon(icon)
+
+
+
+
         self.Icon_Name.setHidden(True)
         self.Menu_Icon.clicked.connect(self.view_menu)
         self.Menu_buuton_name.clicked.connect(self.view_menu)
@@ -149,53 +158,66 @@ class My_Window(QMainWindow,Ui_MainWindow):
             self.DS_File = True
 
     def Adding_Project(self):
-            self.comboBox_operator.clear()
-            self.comboBox_Signal.clear()
+        if not self.Project_added and not self.DS_File:
+            QMessageBox.warning(self, "Project Not Added",
+                                "Please upload the project folder and the direct settable file before continuing.")
+            return
+        if not self.Project_added and self.DS_File:
+            QMessageBox.warning(self, "Project Not Added ",
+                                "Please upload the project folder ")
+            return
+        if not self.DS_File and self.Project_added:
+            QMessageBox.warning(self, "Project Not Added ",
+                                "Please upload the Direct Settable file ")
+
+        self.comboBox_operator.clear()
+        self.comboBox_Signal.clear()
+
+        if not self.folder_path:
+            QMessageBox.warning(self, "Folder Path Not Selected", "Please select a folder path.")
+            return
+
+        Files = os.listdir(self.folder_path)
+        path = [os.path.join(self.folder_path, File) for File in Files]
+        print(path)
+
+        all_operators = []
+
+        for p in path:
+            p = os.path.normpath(p)
+            if p.endswith((".etp", ".vsw", ".err", ".htm", ".ewo")):
+                continue
+            namespace = {
+                'ns': 'http://www.esterel-technologies.com/ns/scade/6',
+                'ed': 'http://www.esterel-technologies.com/ns/scade/pragmas/editor/7'
+            }
+            tree = ET.parse(p)
+            root = tree.getroot()
+
+            inputs = get_inputs(root, namespace)
+            locals_list = get_locals(root, namespace)
+            outputs = get_outputs(root, namespace)
+            equations = process_equations(root, namespace)
+            operator_dict = {
+                'name': root.get('name'),
+                'kind': root.get('kind'),
+                'inputs': inputs,
+                'outputs': outputs,
+                'locals': locals_list,
+                'Equations': equations,
+            }
+
+            all_operators.append(operator_dict)
+
+        self.all_operators = all_operators
+
+        for op in self.all_operators:
+            op_name = op['name']
+            self.comboBox_operator.addItem(op_name)
+
+        self.comboBox_operator.currentTextChanged.connect(self.fill_input_output_signals)
 
 
-            if not self.folder_path:
-                QMessageBox.warning(self, "Folder Path Not Selected", "Please select a folder path.")
-                return
-
-            Files = os.listdir(self.folder_path)
-            path = [os.path.join(self.folder_path, File) for File in Files]
-            print(path)
-
-            all_operators = []
-
-            for p in path:
-                p = os.path.normpath(p)
-                if p.endswith((".etp", ".vsw", ".err", ".htm", ".ewo")):
-                    continue
-                namespace = {
-                    'ns': 'http://www.esterel-technologies.com/ns/scade/6',
-                    'ed': 'http://www.esterel-technologies.com/ns/scade/pragmas/editor/7'
-                }
-                tree = ET.parse(p)
-                root = tree.getroot()
-
-                inputs = get_inputs(root, namespace)
-                locals_list = get_locals(root, namespace)
-                outputs = get_outputs(root, namespace)
-                equations = process_equations(root, namespace)
-                operator_dict = {
-                    'name': root.get('name'),
-                    'kind': root.get('kind'),
-                    'inputs': inputs,
-                    'outputs': outputs,
-                    'locals': locals_list,
-                    'Equations': equations,
-                }
-
-                all_operators.append(operator_dict)
-
-            self.all_operators = all_operators
-
-            for op in self.all_operators:
-                op_name = op['name']
-                self.comboBox_operator.addItem(op_name)
-
-            self.comboBox_operator.currentTextChanged.connect(self.fill_input_output_signals)
 
     def fill_input_output_signals(self, operator_selected):
             operator_inputs = get_inputs_by_operator_name(self.all_operators, operator_selected)
