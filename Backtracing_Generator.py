@@ -1,4 +1,6 @@
+import json
 import os
+import re
 from Xscade_Parser import get_equations_by_operator_name
 def Is_Direct_Settable(Input_Signal,Path_DS_File):
     with open(Path_DS_File, "r") as file:
@@ -33,7 +35,6 @@ def Check_Is_connected_To_Input(argument , Operator):
     return False
 def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal,path_ds):
         BackTracing_Data= ""
-        # Input_List_Tracked = [] # To Stock the signal
         Dependency = Extract_Dependecies_Between_Operators(All_operators)
         Signal_Depndecies = Extracting_Signal_Connexions(Dependency, All_operators)
         locale_Implementation = turn_Local_Implementation_For_All_Operators(All_operators)
@@ -42,18 +43,11 @@ def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal
         Output_Implementation = turn_Output_Implementation_for_All_Operators(All_operators)
         Input_Lists_for_the_Operator_Name_Selected = get_inputs_by_operator_name(All_operators,
                                                                                  Operator_Name_Selected)  # 3
-
-
         Output_Lists_for_the_Operator_Name_Selected = get_outputs_by_operator_name(All_operators,
                                                                                    Operator_Name_Selected)
-        if Is_Connected_To_Direct_Settable(Desired_Signal,path_ds):  # Should Have True
-
+        if Is_Connected_To_Direct_Settable(Desired_Signal,path_ds):  # Should Have Tru
             Ds_Name = Signal_Depndecies[Desired_Signal][0][1]#Here when i will increment the system it should be changed
-            #print(Ds_Name)   #print(f"{Ds_Name} i moved until the signal " )
             BackTracing_Data+=f"\t\t\t\t\t;#Set: {Desired_Signal}:\n \t\t\t\t\t\t;#SetInput: {Ds_Name}\n"
-            #print(f"\t\t\t\tThe '{Desired_Signal}' is directly_connected to : \n \t\t\t\t\t ==>The Direct_Settable signal_Named : {Ds_Name}\n")
-            #file.write(f"The - {Desired_Signal}-  is directly_connected to : \n \t\t ==>The Direct_Settable signal_Named : {Ds_Name}")
-            # add it to the rapport
         elif Desired_Signal in Input_Lists_for_the_Operator_Name_Selected:
             Previous_Operator = Signal_Depndecies[Desired_Signal][0][0]  # Previous_Operator
             # print(Previous_Operator)
@@ -64,31 +58,61 @@ def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal
             Equation_substututed, Input_List_Tracked = Turn_substuated_equation(
                 Lcl_variable_associated_to_the_out_signal, Local_Equation_for_the_current_operator,
                 Input_Equation_for_the_current_operator)
-            #print(Equation_substututed)
-            BackTracing_Data+=f"The Signal : '{Desired_Signal}'  in '{Operator_Name_Selected}' :\n \t -Move to'{Previous_Operator}'\n \t\t ;#Set :{Out_Signal_For_Previous_Operator} \n \t\t\t -Equation:{Equation_substututed} \n \t\t\t\t  - ;#Set:{Input_List_Tracked}\n"
-            #print(f"The signal {Desired_Signal}  u want to set it is  Localised in the Operator {Operator_Name_Selected} and to track it : \n \t -U should to move until the operator {Previous_Operator} and  Set : \n \t\t -Firstly the output : {Out_Signal_For_Previous_Operator} \n \t\t -The equation of this output is : {Equation_substututed} \n \t\t -In The same Operator , the inputs u should to track also are : {Input_List_Tracked}")
-            if Input_List_Tracked:
+
+            BackTracing_Data+=f"The Signal : '{Desired_Signal}'   is localised in '{Operator_Name_Selected}' :\n \t -Move to'{Previous_Operator}'\n \t\t ;#Set_Output:{Out_Signal_For_Previous_Operator} \n \t\t\t -Equation:{Equation_substututed} \n \t\t\t\t  - ;#Set:{Input_List_Tracked}\n"
+
+            if Input_List_Tracked: # here we should to make that all the coming inputs will be under the equation
                 for inputa in Input_List_Tracked:
-                    BackTracing_Data += Backtracing_Generation(All_operators,Previous_Operator, inputa, path_ds)
+                    #BackTracing_Data+= f";# {inputa}\n"
+                    BackTracing_Data += "\n\t"+Backtracing_Generation(All_operators,Previous_Operator, inputa, path_ds)
         elif Desired_Signal in Output_Lists_for_the_Operator_Name_Selected:
             Lcl_variable_associated_to_the_desired_signal = \
             Output_Implementation[Operator_Name_Selected][Desired_Signal][0]
-            print(Lcl_variable_associated_to_the_desired_signal)
             lcl_Implemntation_for_this_op = locale_Implementation[Operator_Name_Selected]
-
-            print(lcl_Implemntation_for_this_op)
             Inp_Implemntation_for_this_op = Inputs_Implemntation[Operator_Name_Selected]
-            print(Inp_Implemntation_for_this_op)
             Equ_Impl, Input_List_Tracked = Turn_substuated_equation(Lcl_variable_associated_to_the_desired_signal,
                                                                     lcl_Implemntation_for_this_op,
                                                                     Inp_Implemntation_for_this_op)
             BackTracing_Data += f"Signal : {Desired_Signal}  in '{Operator_Name_Selected}' :\n \t - Equation : {Equ_Impl}\n \t\t ;#Set :{Input_List_Tracked} \t\t\t \n"
-            print(BackTracing_Data)
             if Input_List_Tracked:
                 for inp in Input_List_Tracked:
-                    BackTracing_Data += Backtracing_Generation(All_operators, Operator_Name_Selected, inp, path_ds)
-
+                    BackTracing_Data += "\n\t"+Backtracing_Generation(All_operators, Operator_Name_Selected, inp, path_ds)
+        if Is_Connected_To_Direct_Settable(Desired_Signal,path_ds):  # Should Have True
+            Ds_Name = Signal_Depndecies[Desired_Signal][0][1]#Here when i will increment the system it should be changed
+            BackTracing_Data+=f"\t\t\t\t\t;#Set: {Desired_Signal}:\n \t\t\t\t\t\t;#SetInput: {Ds_Name}\n"
         return BackTracing_Data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def turn_the_final_equation(expression):
+   main_operator = expression[:expression.find('(')]
+   begin_of_expression = expression.find('(')
+   main_operator = expression[:begin_of_expression]
+   ineer_expression = expression[begin_of_expression+1:-1]
+   #main_operator_1 = ineer_expression[:ineer_expression.find('(')]
+   for car in ineer_expression:
+       pass
+
+
+
+
+
+
+
+
 
 
 
@@ -97,22 +121,20 @@ def Backtracing_Generation(All_operators,Operator_Name_Selected , Desired_Signal
 
 def Turn_substuated_equation(lcl, lcl_Implementation, Input_Implementation):
     Inputs_Tracked = []
-    # Étape 1 : Récupération des substitutions pour la clé donnée
+
     if lcl in lcl_Implementation:
         substitutions = lcl_Implementation[lcl]
-        #print(substitutions)
-        # Étape 2 : Substitution récursive des arguments
+
         arguments = []
         for (op, args) in substitutions:
             for arg in args:
                 argument_substituted, inputs_tracked = Turn_substuated_equation(arg, lcl_Implementation, Input_Implementation)
                 arguments.append(argument_substituted)
                 Inputs_Tracked.extend(inputs_tracked)
-        # Étape 3 : Construction de l'expression substituée
+
         expression = f"{op}({', '.join(arguments)})"
-        #print(expression)
-        #print(expression)
-        # Étape 4 : Vérification et substitution finale
+
+
         for arg in Input_Implementation:
             if arg in expression:
                     input_value = Input_Implementation[arg][0]
@@ -212,9 +234,10 @@ def turn_Local_Implementation_For_All_Operators(All_Operators):
                             arguments = inp['operands']
                             Locale_Implementation.setdefault(Op_Name_lcl, {}).setdefault(lcl , []).append((operand ,arguments))
                         elif "Operator_Called" in inp:
+                            operator_called_pref = "Operator_Called"
                             operator_called = inp['Operator_Called']
                             arguments_call_expression = inp['arguments']
-                            Locale_Implementation.setdefault(Op_Name_lcl, {}).setdefault(lcl, []).append((operator_called,
+                            Locale_Implementation.setdefault(Op_Name_lcl, {}).setdefault(lcl, []).extend(( operator_called_pref, operator_called,
                                                                                                       arguments_call_expression))
                         elif "Unary_Process" in inp :
                             operand_implemented = inp[1]
@@ -290,40 +313,126 @@ def Is_Input_Signal(Operator_Name ,Local_Signal_from_argument , Data):  #Second 
 
 def Extracting_Signal_Connexions(Dependecies ,All_Operators):
 
-        for operator in All_Operators: # loop in all the operator
-            Operator_name = operator['name'] # extraire le nom d l operateur
-            Operator_Inputs = get_inputs_by_operator_name(All_Operators , Operator_name) # les inputs de cet operater
-            Operator_Outputs = get_outputs_by_operator_name(All_Operators , Operator_name) # les outputs de cet operateur
-            Dependecies_Dictionnary = Dependecies[Operator_name]['Called_By'] #Le dictionnaire qui contient les operateur appelllant
-            for operator , argument in Dependecies_Dictionnary.items(): #Dans cette operateur je veux voir l operateur appellant et les arguments (key , value )
-                Operator_Caller = operator  #clé c'est l operateur
-                Arguments_Passed = argument # la liste des arguments
-                for index , argument  in enumerate(Arguments_Passed):  # Je veux parcouri l'argument
-                    Input_Tracked = get_inputs_by_operator_name(All_Operators , Operator_name)[index]  # extraire l inout adéquat
-                    for other_operator in All_Operators: #Parcourir une autre fois les operateurs
-                        if other_operator['name'] == Operator_Caller: # localise l operateur adéquat
-                            Equations_Operator_Called = other_operator['Equations'] # extraire ces équations
-                            for equ in Equations_Operator_Called: #Parcouir ces équations
-                                Input_side_equations = equ['inputs'] #Extraire ce inputs
-                                Output_side_equations = equ['output'] #extraire ces outputs
-                                if argument in Output_side_equations and isinstance(Input_side_equations , list) and "Simple_Assignement" in Input_side_equations: # si l argument est dans la partie output et simple assignment est dans la partie input
-                                    Signal_Name = Input_side_equations[0]
-                                    Signal_Depndecies.setdefault(Input_Tracked , []).append((Operator_Caller,Signal_Name))
+    for operator in All_Operators: # loop in all the operator
+        Operator_name = operator['name'] # extraire le nom d l operateur
+        Operator_Inputs = get_inputs_by_operator_name(All_Operators , Operator_name) # les inputs de cet operater
+        Operator_Outputs = get_outputs_by_operator_name(All_Operators , Operator_name) # les outputs de cet operateur
+        Dependecies_Dictionnary = Dependecies[Operator_name]['Called_By'] #Le dictionnaire qui contient les operateur appelllant
+        for operator , argument in Dependecies_Dictionnary.items():
+            Operator_Caller = operator  #clé c'est l operateur
+            Arguments_Passed = argument # la liste des arguments
+            for index , argument  in enumerate(Arguments_Passed):  # Je veux parcouri l'argument
+                Input_Tracked = Operator_Inputs[index]  # extraire l inout adéquat
+                for other_operator in All_Operators: #Parcourir une autre fois les operateurs
+                    if other_operator['name'] == Operator_Caller: # localise l operateur adéquat
+                        Equations_Operator_Called = other_operator['Equations'] # extraire ces équations
+                        for equ in Equations_Operator_Called: #Parcouir ces équations
+                            Input_side_equations = equ['inputs'] #Extraire ce inputs
+                            Output_side_equations = equ['output'] #extraire ces outputs
+                            if argument in Output_side_equations and isinstance(Input_side_equations , list) and "Simple_Assignement" in Input_side_equations: # si l argument est dans la partie output et simple assignment est dans la partie input
+                                Signal_Name = Input_side_equations[0]
+                                Signal_Depndecies.setdefault(Input_Tracked , []).append((Operator_Caller,Signal_Name))
 
-                                elif argument in Output_side_equations :
-                                    if isinstance(Input_side_equations ,list):
-                                        for item in Input_side_equations:
-                                            if "Operator_Called" in item:
-                                                Successor_Operator = item["Operator_Called"]
-                                                Signal_Name_for_successor = get_outputs_by_operator_name(All_Operators , Successor_Operator)[0]
-                                                Signal_Depndecies.setdefault(Input_Tracked, []).append((Successor_Operator,Signal_Name_for_successor))
+                            elif argument in Output_side_equations : #Optimisaytion
+                                if isinstance(Input_side_equations ,list):
+                                    for item in Input_side_equations:
+                                        if "Operator_Called" in item:
+                                            Successor_Operator = item["Operator_Called"]
+                                            Signal_Name_for_successor = get_outputs_by_operator_name(All_Operators , Successor_Operator)[0]
+                                            Signal_Depndecies.setdefault(Input_Tracked, []).append((Successor_Operator,Signal_Name_for_successor))
+                                        elif "FbyOp" in item:
+                                            lcl_before_opt = item['Inputs']
+                                            for eq in Equations_Operator_Called:
+                                                out_side = eq['output']
+                                                in_side = eq["inputs"]
+                                                if lcl_before_opt in eq['output']:
+                                                    if isinstance(eq['inputs'] , list):
+                                                        for item in eq['inputs']:
+                                                            Successor_Operator1 = item["Operator_Called"]
+                                                            Signal_connected_to_successor = get_outputs_by_operator_name(All_Operators,Successor_Operator1)[0]
+                                                            Signal_Depndecies.setdefault(Input_Tracked , []).append(((Successor_Operator1,Signal_connected_to_successor)))
+
+    return Signal_Depndecies
 
 
-        return Signal_Depndecies
+
+
+def turn_equation_final(expression):
+    operateur_principal = identifier_operateur_principal(expression)
+    sous_expression = extraire_expression_sans_operateur_principal(expression, operateur_principal)
+    sous_expression_remplacee = remplacer_virgules(sous_expression, operateur_principal)
+    parties = diviser_expression(sous_expression_remplacee, operateur_principal)
+    parties_traitees = [turn_equation_final(partie) for partie in parties]
+    expression_finale = combiner_expressions(parties_traitees, operateur_principal)
+    return expression_finale
+def identifier_operateur_principal(expression):
+    # Rechercher le premier opérateur à gauche au niveau le plus haut (pas dans des parenthèses)
+    pattern = r'\b(and|or|not|>=|<=|=|>|<)\b'
+    matches = re.finditer(pattern, expression)
+    niveau_parenthese = 0
+    for match in matches:
+        debut = match.start()
+        for i in range(debut):
+            if expression[i] == '(':
+                niveau_parenthese += 1
+            elif expression[i] == ')':
+                niveau_parenthese -= 1
+        if niveau_parenthese == 0:
+            return match.group()
+    return None
+
+
+def extraire_expression_sans_operateur_principal(expression, operateur):
+    # Enlever l'opérateur principal et retourner la sous-expression
+    return expression.split(operateur, 1)[1].strip()
+
+
+def remplacer_virgules(expression, operateur):
+    # Remplacer les virgules qui ne sont pas dans des parenthèses par l'opérateur donné
+    niveau_parenthese = 0
+    result = []
+    for char in expression:
+        if char == '(':
+            niveau_parenthese += 1
+        elif char == ')':
+            niveau_parenthese -= 1
+        if char == ',' and niveau_parenthese == 0:
+            result.append(f' {operateur} ')
+        else:
+            result.append(char)
+    return ''.join(result)
+
+
+def diviser_expression(expression, operateur):
+    # Diviser l'expression en parties en utilisant l'opérateur donné comme séparateur
+    parties = []
+    niveau_parenthese = 0
+    debut = 0
+    for i, char in enumerate(expression):
+        if char == '(':
+            niveau_parenthese += 1
+        elif char == ')':
+            niveau_parenthese -= 1
+        elif expression[i:i + len(operateur)] == operateur and niveau_parenthese == 0:
+            parties.append(expression[debut:i].strip())
+            debut = i + len(operateur)
+    parties.append(expression[debut:].strip())
+    return parties
+
+
+def combiner_expressions(parties, operateur):
+    # Combiner les parties traitées en une seule expression avec l'opérateur
+    return f' {operateur} '.join(parties)
 
 
 
 
+
+
+with open ('My_Data.json' , 'r') as file:
+    all_op=json.load(file)
+    q=turn_Local_Implementation_For_All_Operators(all_op)
+    print(q)
 
 
 

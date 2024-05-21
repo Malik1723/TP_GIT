@@ -93,6 +93,7 @@ class My_Window(QMainWindow,Ui_MainWindow):
             with open(self.report_file, "w") as file:
                     file.write("")  # Efface le contenu du fichier en le remplaçant par une chaîne vide
             QMessageBox.information(self, "Report File Cleared", "The report file has been cleared.")
+            self.Console_Prjt_BT_Gener.insertPlainText("Report File Cleared : The report file has been cleared \n")
             self.Choose_Report_Folder_Btn.setStyleSheet("background-color: #f0f0f0;")
         except Exception as e:
                 QMessageBox.critical(self, "Error", f"An error occurred while clearing the report file: {str(e)}")
@@ -107,12 +108,21 @@ class My_Window(QMainWindow,Ui_MainWindow):
 
     def view_menu(self):
         self.stackedWidget.setCurrentIndex(0)
+        self.Project_Manageent_Title.setHidden(True)
+        self.Backtracing_generator.setHidden(False)
+
+
 
     def view_project_management(self):
         self.stackedWidget.setCurrentIndex(1)
+        self.Project_Manageent_Title.setHidden(True)
+        self.Backtracing_generator.setHidden(True)
+
 
     def view_report_generation(self):
         self.stackedWidget.setCurrentIndex(2)
+        self.BT_Genr_Title.setHidden(True)
+        self.Backtracing_generator.setHidden(True)
 
     def handle_project_folder(self):
         if self.Project_added:
@@ -124,8 +134,8 @@ class My_Window(QMainWindow,Ui_MainWindow):
     def upload_project_folder(self):
         self.folder_path = QFileDialog.getExistingDirectory(self, "Sélectionner un dossier", "/path/par/défaut")
         if not self.folder_path:
-            QMessageBox.warning(self, "Dossier inapproprié", "Veuillez ajouter le dossier approprié.")
-            self.Console_Project_Management.insertPlainText("Le dossier est vide")
+            QMessageBox.warning(self, "Inappropriate Folder", " Please add the appropriate folder .")
+            self.Console_Project_Management.insertPlainText("The Folder is Empty ")
             return
 
         if self.folder_path:
@@ -146,8 +156,9 @@ class My_Window(QMainWindow,Ui_MainWindow):
                 QMessageBox.warning(self, "Inappropriate folder", "The folder does not contain any xSCADE files")
                 self.Project_added = False
             elif has_etp and has_xscade:
-                self.Console_Project_Management.insertPlainText("Project successfully added")
-                QMessageBox.information(self, "Project added", "Project successfully added")
+                #self.Console_Project_Management.insertPlainText("Project successfully added")
+                QMessageBox.information(self, "Folder added", "Project Folder successfully added")
+                self.Console_Project_Management.insertPlainText("Project Folder is added successfully \n")
                 self.Project_added = True
                 self.Load_Project_Button.setEnabled(False)
 
@@ -168,7 +179,8 @@ class My_Window(QMainWindow,Ui_MainWindow):
                 self.Console_Project_Management.insertPlainText("The extension is not appropriate")
                 return
 
-            QMessageBox.information(self, "Project successfully added", "Project successfully added")
+            QMessageBox.information(self, "Direct Settable File  successfully added", "Direct Settable File successfully added")
+            self.Console_Project_Management.insertPlainText("Direct Settable File successfully added \n")
             self.DS_File = True
 
     def Adding_Project(self):
@@ -225,6 +237,8 @@ class My_Window(QMainWindow,Ui_MainWindow):
 
         self.all_operators = all_operators
 
+        QMessageBox.information(self , "Project added successfully" , "Project is added successfully ")
+        self.Console_Project_Management.insertPlainText("Project is added successfully \n")
         for op in self.all_operators:
             op_name = op['name']
             self.comboBox_operator.addItem(op_name)
